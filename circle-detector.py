@@ -67,7 +67,7 @@ def main():
                         if debug: start = time.time()
                         camera.capture(stream,format='bgr',use_video_port=True)
                         off=get_circles(stream.array)
-                        print(off)
+                        if debug: print(off)
                         if off!=None: writef("output",yamlxy(int(off[0]),int(off[1])))
                         stream.truncate()
                         stream.seek(0)

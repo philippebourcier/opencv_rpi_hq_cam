@@ -10,7 +10,7 @@ def writef(f,c):
     with open("/dev/shm/detector_"+f+".run",'w') as file: file.write(c)
 
 def getf(f):
-    with open("/dev/shm/detector_"+f+".run",'r') as file: return(yaml.load(file,Loader=yaml.FullLoader))
+    with open("/dev/shm/detector_"+f+".run",'r') as file: return(file.read())
 
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
