@@ -76,7 +76,7 @@ def main():
                         time.sleep(1)
 
 if len(sys.argv)==2 and sys.argv[1]=="-d":
-    daemon=Daemonize(app="detector",pid=pid,action=main)
+    daemon=Daemonize(app="circle-detector",pid=pid,action=main)
     daemon.start()
 else:
     main()
