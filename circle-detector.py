@@ -15,27 +15,34 @@ cy=int(str(rez).split("x")[1])//2
 debug=False
 
 def get_circles(img):
-    image = cv2.medianBlur(img,5)
-    ret,th = cv2.threshold(image,80,255,cv2.THRESH_TOZERO)
-    gray = cv2.cvtColor(th,cv2.COLOR_BGR2GRAY)
-    circles = cv2.HoughCircles(gray,cv2.HOUGH_GRADIENT,1,100,param1=50,param2=30,minRadius=48,maxRadius=80)
-    bw = cv2.cvtColor(gray,cv2.COLOR_GRAY2BGR)
+    ## Threshold before blur
+    ret,th=cv2.threshold(img,80,255,cv2.THRESH_TOZERO)
+    image=cv2.medianBlur(th,5)
+    gray=cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
+    ## Blur before threshold
+    #image=cv2.medianBlur(img,5)
+    #ret,th=cv2.threshold(image,80,255,cv2.THRESH_TOZERO)
+    #gray=cv2.cvtColor(th,cv2.COLOR_BGR2GRAY)
+    circles=cv2.HoughCircles(gray,cv2.HOUGH_GRADIENT,1,100,param1=50,param2=30,minRadius=48,maxRadius=80)
+    bw=cv2.cvtColor(gray,cv2.COLOR_GRAY2BGR)
+    offset_x=offset_y=1000
     if circles is not None:
         if debug: print("Got at least one circle")
-        shuffle(circles)
+        # we could randomize the order of the circles found
+        # shuffle(circles)
         circles = np.round(circles[0,:]).astype("int")
-        offset_x=offset_y=0
-        for (x,y,r) in circles:
+        for(x,y,r) in circles:
             cv2.circle(bw,(x,y),r,(0,0,255),4)
             offset_x=cx-x
             offset_y=cy-y
             if debug: cv2.circle(bw,(x+offset_x,y+offset_y),r,(255,255,0),2)
+            # return the first circle found...
+            return([offset_x,offset_y])
         if debug: cv2.circle(bw,(cx,cy),5,(0,255,255),2)
-        return([offset_x,offset_y])
     elif debug:
         print("Nothing found")
-        cv2.imwrite("output.jpg",np.hstack([image,bw]))
-        return([1000,1000])
+    if debug: cv2.imwrite("output.jpg",np.hstack([image,bw]))
+    return([offset_x,offset_y])
 
 def yamlxy(x,y):
     return("---\nx: "+str(x)+"\ny: "+str(y)+"\n")
@@ -60,7 +67,8 @@ def main():
                         if debug: start = time.time()
                         camera.capture(stream,format='bgr',use_video_port=True)
                         off=get_circles(stream.array)
-                        writef("output",yamlxy(off[0],off[1]))
+                        print(off)
+                        if off!=None: writef("output",yamlxy(int(off[0]),int(off[1])))
                         stream.truncate()
                         stream.seek(0)
                         if debug: print(time.time()-start)
